@@ -11,6 +11,23 @@ Presentation katmanı Application katmanını referans edecek
 Presentation katmanı Infrastructure katmanını referans edecek
 Presentation katmanı Persistence katmanını referans edecek
 ----------------------------------------
+Domain katmanında Entities adında bir klasör oluşturuyoruz burada veritabanı nesnelerimizi tutacağız ancak burada tüm entitylerin ortak alanlarını örneğin id,createdDate vb. property lerin tutulacağı bir genel baseentity clsssının tutulması için Entities Klasörünün içine Common adında bir klasör daha oluşturuyoruz. Şimdi Common klasöründe BaseEntity adında bir class oluşturuyoruz.
+------------------------------
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ETicaretAPI.Domain.Entities.Common
+{
+    public class BaseEntity
+    {
+        public int Id { get; set; }
+        public DateTime CreatedDate { get; set; }
+    }
+}
+--------------------------------
 
 
 
