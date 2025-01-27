@@ -144,7 +144,73 @@ namespace ETicaretAPI.API.Controllers
     }
 }
 -----------------------------
-Böylece dummy data ile çalışsakta onion architecture sistemi doğru kurulduğundan dolayı ürünler getirilebildi. Şimdi veritabanı alt yapılarını hazırlayalım.
+Böylece dummy data ile çalışsakta onion architecture sistemi doğru kurulduğundan dolayı ürünler getirilebildi. Şimdi veritabanı alt yapılarını hazırlayalım. Ama önce dummy data ile ilgili tüm yapıları siliyoruz. Öncelikle 3 tablo üzerinden gideceğiz product,order ve customer tabloları
+----------------------------
+using ETicaretAPI.Domain.Entities.Common;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ETicaretAPI.Domain.Entities
+{
+    public class Product:BaseEntity
+    {
+        public string Name { get; set; }
+        public int Stock { get; set; }
+        public long Price { get; set; }
+        public ICollection<Order> Orders { get; set; }
+    }
+}
+------------------------------
+using ETicaretAPI.Domain.Entities.Common;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ETicaretAPI.Domain.Entities
+{
+    public class Order:BaseEntity
+    {
+        public string Description { get; set; }
+        public string Adress { get; set; }
+        public int CustomerId { get; set; }
+        public ICollection<Product> Productions { get; set; }
+        public Customer Customer { get; set; }
+    }
+}
+------------------------------
+şimdilik entitylerimiz bu kadar şimdi de context nesnesi oluşturalım.Persistence katmanında Contexts adında bir klasör oluşturuyoruz. ve içine ETicaretAPIDbContext adında bir context nesnesi oluşturuyoruz bu sınıfı oluşturuyoruz ama bunun bir context olabilmesi için DbContext ten kalıtım alması gerekiyor ama bunu yapabilmemiz için Microsft.EntityFrameworkCore paketinin yüklenmesi gerekir.
+----------------------------
+using ETicaretAPI.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ETicaretAPI.Persistence.Contexts
+{
+    public class ETicaretAPIDbContext : DbContext
+    {
+        public ETicaretAPIDbContext(DbContextOptions options) : base(options)
+        {
+        }
+        public DbSet<Product> Products { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<Customer> Customers { get; set; }
+    }
+}
+--------------------------------
+Tabi bunun IoC Conteynıra bildirilmesi gerekiyor. Bunun için ServiceRegistration sınıfını kullanacağız. Bu servis registration sınıfıyla program.cs dosyasında kullanacağımız IoC Conteynıra context'i bildiriyoruz daha önce dummy data ile çalışırkende productService ve IProductService bildirmiştik. Burada postgreSql i çağıracağız ama bunun için bir paket yüklememiz gerekiyor. Manage nuget package ile Npgsql.EntityFrameworkCore.PostgreSQL paketini yüklüyoruz.
+
+
+
 
 
 
