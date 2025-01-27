@@ -144,7 +144,7 @@ namespace ETicaretAPI.API.Controllers
     }
 }
 -----------------------------
-Böylece dummy data ile çalışsakta onion architecture sistemi doğru kurulduğundan dolayı ürünler getirilebildi.
+Böylece dummy data ile çalışsakta onion architecture sistemi doğru kurulduğundan dolayı ürünler getirilebildi. Şimdi veritabanı alt yapılarını hazırlayalım.
 
 
 
