@@ -208,6 +208,64 @@ namespace ETicaretAPI.Persistence.Contexts
 }
 --------------------------------
 Tabi bunun IoC Conteynıra bildirilmesi gerekiyor. Bunun için ServiceRegistration sınıfını kullanacağız. Bu servis registration sınıfıyla program.cs dosyasında kullanacağımız IoC Conteynıra context'i bildiriyoruz daha önce dummy data ile çalışırkende productService ve IProductService bildirmiştik. Burada postgreSql i çağıracağız ama bunun için bir paket yüklememiz gerekiyor. Manage nuget package ile Npgsql.EntityFrameworkCore.PostgreSQL paketini yüklüyoruz.
+-------------------------------
+using ETicaretAPI.Persistence.Contexts;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ETicaretAPI.Persistence
+{
+    public static class ServiceRegistration
+    {
+        public static void AddPersistenceServices(this IServiceCollection services)
+        {
+            services.AddDbContext<ETicaretAPIDbContext>(options => options.UseNpgsql("User ID=postgres;Password=12345;Host=localhost;Port=5432;Database=ETicaretAPIDb"));
+        }
+    }
+}
+-----------------------------
+şimdi sırada migration işlemi var. Öncelikle manage nuget package den persistence üzerinde Microsoft.EntityFrameworkCore.Tools ve Microsoft.EntityFrameworkCore.Design paketlerini yüklüyoruz.Bu paketleri hem persistence katmanına hemde presentation katmanına yüklüyoruz.
+
+MIGRATION KOMUTLARI
+-----------------------
+enable-migration--------------->Migrationu aktif hale getirir.
+add-migration mig_1------------>mig_1 adında migration oluşturulur.
+update-database---------------->Database oluşur.
+--------------------------
+
+Biz kodlarımızın hiç bir yerinde bilgilerimizi girmememiz gerekiyor dolayısıyla connection stringi bu şekilde girmeyeceğiz burada bir düzenleme yapacağız. Ama önce eğer biz bu migration komutlarını cmd yada powershell üzerinden yapacaksak kodumuzu şu şekilde düzenliyoruz. öncelikle Persistence katmanında DesignTimeDbContextFactory adında bir class oluşturuyoruz.
+-----------------------------
+using ETicaretAPI.Persistence.Contexts;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ETicaretAPI.Persistence
+{
+    public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<ETicaretAPIDbContext>
+    {
+        public ETicaretAPIDbContext CreateDbContext(string[] args)
+        {
+            DbContextOptionsBuilder<ETicaretAPIDbContext> dbContextOptionBuilder = new();
+            dbContextOptionBuilder.UseNpgsql("User ID=postgres;Password=12345;Host=localhost;Port=5432;Database=ETicaretAPIDb");
+            return new (dbContextOptionBuilder.Options);
+        }
+    }
+}
+----------------------------
+powershell de komut 
+dotnet ef migrations add mig_1-----------------> Ama bu kod bende çalışmadı ef yi tanımadı
+-------------------------------
+
 
 
 
