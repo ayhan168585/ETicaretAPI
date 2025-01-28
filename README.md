@@ -264,7 +264,9 @@ namespace ETicaretAPI.Persistence
 ----------------------------
 powershell de komut 
 dotnet ef migrations add mig_1-----------------> Ama bu kod bende çalışmadı ef yi tanımadı
+dotnet ef database update
 -------------------------------
+Biz migration komutlarını visual studio içindeki package manager console 'dan yapıyoruz. Komutlarımızdan sonra veritabanımız oluşuyor. Şimdi connection stringin açık şekilde yazılmasını düzeltelim. Bu tip düzeltmeler json dosyaları üzerinden yapılır. Bizim hali hazırda bir json dosyamız var. appsettings.json dosyası bunun üzerinde düzeltilecek ve ilgili yerde buradan çağırılacak. 
 
 
 
