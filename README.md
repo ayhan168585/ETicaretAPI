@@ -266,7 +266,21 @@ powershell de komut
 dotnet ef migrations add mig_1-----------------> Ama bu kod bende çalışmadı ef yi tanımadı
 dotnet ef database update
 -------------------------------
-Biz migration komutlarını visual studio içindeki package manager console 'dan yapıyoruz. Komutlarımızdan sonra veritabanımız oluşuyor. Şimdi connection stringin açık şekilde yazılmasını düzeltelim. Bu tip düzeltmeler json dosyaları üzerinden yapılır. Bizim hali hazırda bir json dosyamız var. appsettings.json dosyası bunun üzerinde düzeltilecek ve ilgili yerde buradan çağırılacak. Ancak burada Gençay hocanın kullanmış olduğu versiyonda kullandığı ConfigurationManager sınıfı Benim kullandığım NET:8'de çalışmadı oyüzden şu şekilde düzenleme yaptım. Yine şu 2 paket yüklenecek Microsoft.Extensions.Configuration ve Microsoft.Extensions.Configuration.Json ama bunun yanında benim yaptığım düzenleme için ek olarak Microsoft.Extensions.Hosting, Microsoft.Extensions.Hosting.Abstractions paketleri de yüklenecek bundan sonra persistence katmanında Configuration adlı static bir sınıf oluşturuluyor.
+Biz migration komutlarını visual studio içindeki package manager console 'dan yapıyoruz. Komutlarımızdan sonra veritabanımız oluşuyor. Şimdi connection stringin açık şekilde yazılmasını düzeltelim. Bu tip düzeltmeler json dosyaları üzerinden yapılır. Bizim hali hazırda bir json dosyamız var. appsettings.json dosyası bunun üzerinde düzeltilecek ve ilgili yerde buradan çağırılacak. Ancak burada Gençay hocanın kullanmış olduğu versiyonda kullandığı ConfigurationManager sınıfı Benim kullandığım NET:8'de çalışmadı oyüzden şu şekilde düzenleme yaptım. Yine şu 2 paket yüklenecek Microsoft.Extensions.Configuration ve Microsoft.Extensions.Configuration.Json ama bunun yanında benim yaptığım düzenleme için ek olarak Microsoft.Extensions.Hosting, Microsoft.Extensions.Hosting.Abstractions paketleri de yüklenecek bundan sonra öncelikle appsettings.json dosyasında şu düzenlemeyi yapıyoruz ardından persistence katmanında Configuration adlı static bir sınıf oluşturuluyor.
+------------------------------
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+    "ConnectionStrings" : {
+    "PostgreSQL": "User ID=postgres;Password=12345;Host=localhost;Port=5432;Database=ETicaretAPIDb;"
+  }
+}
+
 ------------------------------
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -347,7 +361,11 @@ namespace ETicaretAPI.Persistence
     }
 }
 -----------------------------
-Migration ve veritabanını siliyoruz ve tekrar migration yapıyoruz böylece connection stringe ulaşabildiğimizi ve veritabanının oluştuğunu görüyoruz.
+Migration ve veritabanını siliyoruz ve tekrar migration yapıyoruz böylece connection stringe ulaşabildiğimizi ve veritabanının oluştuğunu görüyoruz. Şimdi bir sonraki işlemimiz veri erişim modelini tasarlamak 
+
+GENERİC REPOSITORY DESİGN PATTERN 
+----------------------------------
+Öncelikle Application katmanından başlayacağız çünkü önce arayüzler oluşturulur(interface) ve daha sonra concrete oluşturulur. Arayüzler Application katmanında oluşturulacağından dolayı Application katmanından başlıyoruz. Hem Application katmanında hemde persistence katmanında Repositories adında klasör oluşturuluyor. Application katmanındaki Repositories klasörü içine IRepository interface'i oluşturuluyor.
 
 
 
