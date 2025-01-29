@@ -365,7 +365,120 @@ Migration ve veritabanını siliyoruz ve tekrar migration yapıyoruz böylece co
 
 GENERİC REPOSITORY DESİGN PATTERN 
 ----------------------------------
-Öncelikle Application katmanından başlayacağız çünkü önce arayüzler oluşturulur(interface) ve daha sonra concrete oluşturulur. Arayüzler Application katmanında oluşturulacağından dolayı Application katmanından başlıyoruz. Hem Application katmanında hemde persistence katmanında Repositories adında klasör oluşturuluyor. Application katmanındaki Repositories klasörü içine IRepository interface'i oluşturuluyor. Yalnız repository tasarımımızda şöyle bir değişiklik yapacağız veritabanındaki tablolara okuma yapan repositoryi ayrı yazım işlemi yapacağımız reposioryi ayrı oluşturacağız.
+Öncelikle Application katmanından başlayacağız çünkü önce arayüzler oluşturulur(interface) ve daha sonra concrete oluşturulur. Arayüzler Application katmanında oluşturulacağından dolayı Application katmanından başlıyoruz. Hem Application katmanında hemde persistence katmanında Repositories adında klasör oluşturuluyor. Application katmanındaki Repositories klasörü içine IRepository interface'i oluşturuluyor. Yalnız repository tasarımımızda şöyle bir değişiklik yapacağız veritabanındaki tablolara okuma yapan repositoryi ayrı yazım işlemi yapacağımız reposioryi ayrı oluşturacağız. Şimdi elimizde 3 tane IRepository var IRepository veritabanı tablolarıyla genel işlemleri, IReadRepository veritabanı tablolarındaki okuma işlemlerini, IWriteRepository veritabanı tablolarına yazma işlemlerini yapacak. Ama bazı fonksiyonlar asenkron fonksiyonları kullanacak o yüzden biz baştan asenkron tasarlayacağız.
+-----------------------------
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ETicaretAPI.Application.Repositories
+{
+    public interface IRepository<T> where T : class
+    {
+        DbSet<T> Table {  get; }
+    }
+}
+------------------------------
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ETicaretAPI.Application.Repositories
+{
+    public interface IReadRepository<T>:IRepository<T> where T : class
+    {
+        IQueryable<T> GetAll();
+        IQueryable<T> GetWhere(Expression<Func<T,bool>>method);
+        Task<T> GetSingleAsync(Expression<Func<T,bool>>method);
+        Task<T> GetByIdAsync(string Id);
+    }
+}
+----------------------------
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ETicaretAPI.Application.Repositories
+{
+    public interface IWriteRepository<T>:IRepository<T> where T : class
+    {
+        Task<bool> AddAsync(T model);
+        Task<bool> AddAsync(List<T> model);
+        Task<bool> Remove(T model);
+        Task<bool> Remove(string Id);
+        Task<bool> UpdateAsync(T model);
+
+
+    }
+}
+------------------------------
+şimdi de bunları implemente edecek somut nesneleri oluşturuyoruz. Ama önce şunu söylemek gerekiyor şimdiki tasarımımızda her türlü class gelebilmekte oysa bizim GetById gibi sorgularımızda bize Id gerekiyor ama bütün klaslarda Id olmak zorunda değil bu sebeple <T>'nin bir entity olduğunu belirtmemiz gerekiyor dolayısıyla ya IEntity gibi bir interface yada bizim burada yaptığımız gibi BaseEntity gibi bir class'ı marker(işaretleyici) olarak kullanabiliriz.(ikisinden birini kullanmalıyız) Bunu IRepository,IReadRepository ve IriteRepository için yapıyoruz.
+Tabi bunu yapınca concrete nesnelerde buna uygun düzenlenecek
+------------------------------
+using ETicaretAPI.Domain.Entities.Common;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ETicaretAPI.Application.Repositories
+{
+    public interface IRepository<T> where T : BaseEntity
+    {
+        DbSet<T> Table {  get; }
+    }
+}
+-----------------------------
+using ETicaretAPI.Domain.Entities.Common;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ETicaretAPI.Application.Repositories
+{
+    public interface IReadRepository<T>:IRepository<T> where T : BaseEntity
+    {
+        IQueryable<T> GetAll();
+        IQueryable<T> GetWhere(Expression<Func<T,bool>>method);
+        Task<T> GetSingleAsync(Expression<Func<T,bool>>method);
+        Task<T> GetByIdAsync(string Id);
+    }
+}
+---------------------------
+using ETicaretAPI.Domain.Entities.Common;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ETicaretAPI.Application.Repositories
+{
+    public interface IWriteRepository<T>:IRepository<T> where T : BaseEntity
+    {
+        Task<bool> AddAsync(T model);
+        Task<bool> AddAsync(List<T> model);
+        Task<bool> Remove(T model);
+        Task<bool> Remove(string Id);
+        Task<bool> UpdateAsync(T model);
+
+
+    }
+}
+--------------------------
 
 
 
