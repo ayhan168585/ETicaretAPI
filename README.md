@@ -365,7 +365,7 @@ Migration ve veritabanını siliyoruz ve tekrar migration yapıyoruz böylece co
 
 GENERİC REPOSITORY DESİGN PATTERN 
 ----------------------------------
-Öncelikle Application katmanından başlayacağız çünkü önce arayüzler oluşturulur(interface) ve daha sonra concrete oluşturulur. Arayüzler Application katmanında oluşturulacağından dolayı Application katmanından başlıyoruz. Hem Application katmanında hemde persistence katmanında Repositories adında klasör oluşturuluyor. Application katmanındaki Repositories klasörü içine IRepository interface'i oluşturuluyor.
+Öncelikle Application katmanından başlayacağız çünkü önce arayüzler oluşturulur(interface) ve daha sonra concrete oluşturulur. Arayüzler Application katmanında oluşturulacağından dolayı Application katmanından başlıyoruz. Hem Application katmanında hemde persistence katmanında Repositories adında klasör oluşturuluyor. Application katmanındaki Repositories klasörü içine IRepository interface'i oluşturuluyor. Yalnız repository tasarımımızda şöyle bir değişiklik yapacağız veritabanındaki tablolara okuma yapan repositoryi ayrı yazım işlemi yapacağımız reposioryi ayrı oluşturacağız.
 
 
 
