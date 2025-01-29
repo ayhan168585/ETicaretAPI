@@ -266,7 +266,90 @@ powershell de komut
 dotnet ef migrations add mig_1-----------------> Ama bu kod bende çalışmadı ef yi tanımadı
 dotnet ef database update
 -------------------------------
-Biz migration komutlarını visual studio içindeki package manager console 'dan yapıyoruz. Komutlarımızdan sonra veritabanımız oluşuyor. Şimdi connection stringin açık şekilde yazılmasını düzeltelim. Bu tip düzeltmeler json dosyaları üzerinden yapılır. Bizim hali hazırda bir json dosyamız var. appsettings.json dosyası bunun üzerinde düzeltilecek ve ilgili yerde buradan çağırılacak. 
+Biz migration komutlarını visual studio içindeki package manager console 'dan yapıyoruz. Komutlarımızdan sonra veritabanımız oluşuyor. Şimdi connection stringin açık şekilde yazılmasını düzeltelim. Bu tip düzeltmeler json dosyaları üzerinden yapılır. Bizim hali hazırda bir json dosyamız var. appsettings.json dosyası bunun üzerinde düzeltilecek ve ilgili yerde buradan çağırılacak. Ancak burada Gençay hocanın kullanmış olduğu versiyonda kullandığı ConfigurationManager sınıfı Benim kullandığım NET:8'de çalışmadı oyüzden şu şekilde düzenleme yaptım. Yine şu 2 paket yüklenecek Microsoft.Extensions.Configuration ve Microsoft.Extensions.Configuration.Json ama bunun yanında benim yaptığım düzenleme için ek olarak Microsoft.Extensions.Hosting, Microsoft.Extensions.Hosting.Abstractions paketleri de yüklenecek bundan sonra persistence katmanında Configuration adlı static bir sınıf oluşturuluyor.
+------------------------------
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ETicaretAPI.Persistence
+{
+    public static class Configuration
+    {
+        public static string ConnectionString 
+        {
+            get
+            {
+                using IHost host = Host.CreateApplicationBuilder().Build();
+                IConfiguration config = host.Services.GetRequiredService<IConfiguration>();
+                string connectionString = config.GetValue<string>("ConnectionStrings:PostgreSQL");
+                return connectionString;
+            }        
+         }
+    }
+}
+--------------------------
+Bunu nerede kullanmak istersek buradan çekip alıyoruz. ServiceRegistration sınıfına şu şekilde alıyoruz.
+-------------------------
+using ETicaretAPI.Application.Abstractions;
+using ETicaretAPI.Persistence.Concretes;
+using ETicaretAPI.Persistence.Contexts;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ETicaretAPI.Persistence
+{
+    public static class ServiceRegistration
+    {
+        public static void AddPersistenceServices(this IServiceCollection services)
+        {            
+            services.AddSingleton<IProductService,ProductService>();
+           services.AddDbContext<ETicaretAPIDbContext>(options=>options.UseNpgsql(Configuration.ConnectionString));
+        }
+    }
+}
+----------------------------
+using ETicaretAPI.Persistence.Contexts;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ETicaretAPI.Persistence
+{
+    public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<ETicaretAPIDbContext>
+    {
+        public ETicaretAPIDbContext CreateDbContext(string[] args)
+        {
+            DbContextOptionsBuilder<ETicaretAPIDbContext> dbContextOptionBuilder = new();
+            dbContextOptionBuilder.UseNpgsql(Configuration.ConnectionString);
+            return new (dbContextOptionBuilder.Options);
+        }
+    }
+}
+-----------------------------
+Migration ve veritabanını siliyoruz ve tekrar migration yapıyoruz böylece connection stringe ulaşabildiğimizi ve veritabanının oluştuğunu görüyoruz.
+
+
 
 
 
