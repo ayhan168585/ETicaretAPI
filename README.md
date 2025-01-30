@@ -836,6 +836,87 @@ Productscontroller de yeni bir HttpGet ile bunu bir kontrol edelim.
       return Ok(product);
   }
   ----------------------------
+  Şimdi EntityFrameork vasıtasıyla yapılan sorgularla çekilen verilerin takip edilmesini sağlayan tracking sistemi üzerine bir çalışma yapacağız
+
+  ENTITY FRAMEORK CORE TRACKING SİSTEMİ
+  ---------------------------------------
+  DbContext vasıtasıyla veri tabanında yapılan işlemler üzerinde tracking mekanizması otomatik olarak çalışır ve her işlemi izler.Veriler üzerinde herhangi bir manipülasyon(update,delete vb) yapmayacaksak tracking sisteminin devre dışı bırakılması daha performanslı çalışmaya yarayacaktır diyelimki 1000 tane ürünümüz var ve bunun listelenmesi komutunu veriyorum eğer bu 1000 tane ürün üzerinde herhangi bir manipülasyon işlemi yoksa tracking sisteminin devre dışı bırakılması daha hızlı çalışmasına sebep olur.
+  --------------------------
+  using ETicaretAPI.Domain.Entities.Common;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ETicaretAPI.Application.Repositories
+{
+    public interface IReadRepository<T>:IRepository<T> where T : BaseEntity
+    {
+        IQueryable<T> GetAll(bool tracking=true);
+        IQueryable<T> GetWhere(Expression<Func<T,bool>>method, bool tracking = true);
+        Task<T> GetSingleAsync(Expression<Func<T,bool>>method, bool tracking = true);
+        Task<T> GetByIdAsync(string Id, bool tracking = true);
+    }
+}
+-------------------------
+using ETicaretAPI.Application.Repositories;
+using ETicaretAPI.Domain.Entities.Common;
+using ETicaretAPI.Persistence.Contexts;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ETicaretAPI.Persistence.Repositories
+{
+    public class ReadRepository<T> : IReadRepository<T> where T : BaseEntity
+    {
+        private readonly ETicaretAPIDbContext _context;
+        public ReadRepository(ETicaretAPIDbContext context)
+        {
+            _context = context;
+        }
+        public DbSet<T> Table => _context.Set<T>();
+        public IQueryable<T> GetAll(bool tracking = true)
+        {
+            var query=Table.AsQueryable();
+            if(!tracking)
+                query=query.AsNoTracking();
+            return query;
+        }
+        public IQueryable<T> GetWhere(Expression<Func<T, bool>> method,bool tracking=true)
+           {
+            var query=Table.Where(method);
+            if(!tracking)
+                query=query.AsNoTracking();
+            return query;
+        }      
+        public async Task<T> GetSingleAsync(Expression<Func<T, bool>> method, bool tracking = true)
+        {
+            var query = Table.AsQueryable();
+            if (!tracking)
+                query = Table.AsNoTracking();
+             return await query.FirstOrDefaultAsync(method);
+        }
+        public async Task<T> GetByIdAsync(string id, bool tracking = true)
+        //=> await Table.FirstOrDefaultAsync(data => data.Id == Guid.Parse(id));
+        //=> await Table.FindAsync(Guid.Parse(id));
+        {
+            var query=Table.AsQueryable();
+            if(!tracking)
+                query = query.AsNoTracking();
+            return await query.FirstOrDefaultAsync(data=>data.Id==Guid.Parse(id));
+        }
+    }
+}
+
+---------------------------
+
   
 
 
