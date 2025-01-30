@@ -678,19 +678,20 @@ namespace ETicaretAPI.Persistence
     public static class ServiceRegistration
     {
         public static void AddPersistenceServices(this IServiceCollection services)
-        {            
-            services.AddScoped<ICustomerReadRepository,CustomerReadRepository>();
-            services.AddScoped<ICustomerWriteRepository,CustomerWriteRepository>();
-            services.AddScoped<IOrderWriteRepository,OrderWriteRepository>();
-            services.AddScoped<IOrderReadRepository,OrderReadRepository>();
-            services.AddScoped<IProductReadRepository,ProductReadRepository>();
-            services.AddScoped<IProductWriteRepository,ProductWriteRepository>();
-           services.AddDbContext<ETicaretAPIDbContext>(options=>options.UseNpgsql(Configuration.ConnectionString));
+        {
+          services.AddDbContext<ETicaretAPIDbContext>(options=>options.UseNpgsql(Configuration.ConnectionString),ServiceLifetime.Singleton);
+            services.AddSingleton<ICustomerReadRepository, CustomerReadRepository>();
+            services.AddSingleton<ICustomerWriteRepository, CustomerWriteRepository>();
+            services.AddSingleton<IOrderWriteRepository, OrderWriteRepository>();
+            services.AddSingleton<IOrderReadRepository, OrderReadRepository>();
+            services.AddSingleton<IProductReadRepository, ProductReadRepository>();
+            services.AddSingleton<IProductWriteRepository, ProductWriteRepository>();
         }
     }
 }
+
 --------------------------
-ve en son ProductControlleri şu şekilde düzenliyoruz bakalım ürünler geliyormu
+ve en son ProductControlleri şu şekilde düzenliyoruz bakalım ürünler geliyormu ama AddScoped ürün oluşturma sırasında hata verdiğinden yukarıdaki şekilde düzeltildi.
 ------------------------
 using ETicaretAPI.Application.Repositories.Products;
 using Microsoft.AspNetCore.Mvc;
@@ -718,7 +719,124 @@ namespace ETicaretAPI.API.Controllers
 }
 ----------------------------
 Bunu yapınca ürünler listesi boş şekilde geliyor çünkü veritabanında ürün yok.
+----------------------------
+productsController ürün oluşturma sırasında DateTime.Now hata verdiğinden DateTime.UtcNow şekline dönüştürüldü.
+---------------------------
+using ETicaretAPI.Application.Repositories.Products;
+using Microsoft.AspNetCore.Mvc;
 
+namespace ETicaretAPI.API.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class ProductsController : ControllerBase
+    {
+        private readonly IProductReadRepository _productReadRepository;
+        private readonly IProductWriteRepository _productWriteRepository;
+        public ProductsController(IProductReadRepository productReadRepository, IProductWriteRepository productWriteRepository)
+        {
+            _productReadRepository = productReadRepository;
+            _productWriteRepository = productWriteRepository;
+        }
+        [HttpGet]
+        public async void Get()
+        {
+           await _productWriteRepository.AddRangeAsync(new()
+            {
+                new(){Id=Guid.NewGuid(),Name="Product 1",Stock=10,Price=100,CreatedDate=DateTime.UtcNow},
+                new(){Id=Guid.NewGuid(),Name="Product 2",Stock=10,Price=200,CreatedDate=DateTime.UtcNow},
+                new(){Id=Guid.NewGuid(),Name="Product 3",Stock=10,Price=300,CreatedDate=DateTime.UtcNow},
+                new(){Id=Guid.NewGuid(),Name="Product 4",Stock=10,Price=400,CreatedDate=DateTime.UtcNow}
+            });
+           await _productWriteRepository.SaveAsync();
+        }
+    }
+}
+---------------------------
+Bu düzeltmelerden sonra (ServiceRegistration ve UtcNow) veritabanına 4 adet ürün eklendi.
+
+DÜZELTMELER
+-------------------------
+Şimdi daha önce hata verdiği ServiceRegistration ilk durumuyla ilgili AddScoped iken hatanın çözümü 
+öncelikle AddScoped iken Dispose hatası alıyorduk. Bunun nedeni Scoped'de request edilen her nesne işi bittikten sonra dispose edilir. ProductsController de örnek product oluşturmak için kullanılan Get fonksiyonu asenkron tanımlanmadığı için ürün oluşturma sırasında _productWriteResponse dispose edildiğinden hata veriyor. Bunu Addscoped kullandığımızda productsController deki Get fonksiyonunu Task ile kullanmaktır. Serviceregistration'u ilk haline çeviriyor ve controlleri task ile düzeltiyoruz.
+---------------------------
+using ETicaretAPI.Application.Repositories.Customers;
+using ETicaretAPI.Application.Repositories.Orders;
+using ETicaretAPI.Application.Repositories.Products;
+using ETicaretAPI.Persistence.Contexts;
+using ETicaretAPI.Persistence.Repositories.Customers;
+using ETicaretAPI.Persistence.Repositories.Orders;
+using ETicaretAPI.Persistence.Repositories.Products;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+
+
+namespace ETicaretAPI.Persistence
+{
+    public static class ServiceRegistration
+    {
+        public static void AddPersistenceServices(this IServiceCollection services)
+        {
+          services.AddDbContext<ETicaretAPIDbContext>(options=>options.UseNpgsql(Configuration.ConnectionString));              
+            services.AddScoped<ICustomerReadRepository,CustomerReadRepository>();
+            services.AddScoped<ICustomerWriteRepository,CustomerWriteRepository>();
+            services.AddScoped<IOrderWriteRepository,OrderWriteRepository>();
+            services.AddScoped<IOrderReadRepository,OrderReadRepository>();
+            services.AddScoped<IProductReadRepository,ProductReadRepository>();
+            services.AddScoped<IProductWriteRepository,ProductWriteRepository>();
+        }
+    }
+}
+
+-------------------------
+using ETicaretAPI.Application.Repositories.Products;
+using Microsoft.AspNetCore.Mvc;
+
+namespace ETicaretAPI.API.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class ProductsController : ControllerBase
+    {
+        private readonly IProductReadRepository _productReadRepository;
+        private readonly IProductWriteRepository _productWriteRepository;
+        public ProductsController(IProductReadRepository productReadRepository, IProductWriteRepository productWriteRepository)
+        {
+            _productReadRepository = productReadRepository;
+            _productWriteRepository = productWriteRepository;
+        }
+        [HttpGet]
+        public async Task Get()
+        {
+           await _productWriteRepository.AddRangeAsync(new()
+            {
+                new(){Id=Guid.NewGuid(),Name="Product 1",Stock=10,Price=100,CreatedDate=DateTime.UtcNow},
+                new(){Id=Guid.NewGuid(),Name="Product 2",Stock=10,Price=200,CreatedDate=DateTime.UtcNow},
+                new(){Id=Guid.NewGuid(),Name="Product 3",Stock=10,Price=300,CreatedDate=DateTime.UtcNow},
+                new(){Id=Guid.NewGuid(),Name="Product 4",Stock=10,Price=400,CreatedDate=DateTime.UtcNow}
+            });
+           await _productWriteRepository.SaveAsync();
+        }
+    }
+}
+---------------------------
+peki singleton da neden hata vermedi çünkü scoped da oluşturulan nesne işi bittikten sonra hemen dispose olduğundan (asenkronda ise verinin gelmesini bekliyor) void kullanılırken veri gelmeden evvel dispose olduğundan hata verdi singletonda ise işlem bitse bile dispose olmadığından hata vermedi peki hangisini kullanmalıyız Addscoped olarak kullanılması daha sağlılı bu sebeple problemi yukarıdaki şekilde çözüyoruz. Bir sonraki çözümümüz GetById de marker kullanarak sorunu çözmüştük şimdi bir başka çözüm yöntemini görelim. FindAsync kullanarak çözöyoruz
+---------------------------
+ public async Task<T> GetByIdAsync(string id)
+     //=> await Table.FirstOrDefaultAsync(data => data.Id == Guid.Parse(id));
+     => await Table.FindAsync(Guid.Parse(id));
+------------------------------
+Productscontroller de yeni bir HttpGet ile bunu bir kontrol edelim.
+----------------------------
+  [HttpGet("{id}")]
+
+  public async Task<IActionResult> Get(string id)
+  {
+      Product product=await _productReadRepository.GetByIdAsync(id);
+      return Ok(product);
+  }
+  ----------------------------
+  
 
 
 
