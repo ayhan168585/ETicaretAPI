@@ -23,17 +23,19 @@ namespace ETicaretAPI.API.Controllers
         [HttpGet]
         public async Task Get()
         {
-            await _productWriteRepository.AddRangeAsync(new()
-            {
-                new(){Id=Guid.NewGuid(),Name="Product 1",Stock=10,Price=100,CreatedDate=DateTime.UtcNow},
-                new(){Id=Guid.NewGuid(),Name="Product 2",Stock=10,Price=200,CreatedDate=DateTime.UtcNow},
-                new(){Id=Guid.NewGuid(),Name="Product 3",Stock=10,Price=300,CreatedDate=DateTime.UtcNow},
-                new(){Id=Guid.NewGuid(),Name="Product 4",Stock=10,Price=400,CreatedDate=DateTime.UtcNow}
+            //await _productWriteRepository.AddRangeAsync(new()
+            //{
+            //    new(){Id=Guid.NewGuid(),Name="Product 1",Stock=10,Price=100,CreatedDate=DateTime.UtcNow},
+            //    new(){Id=Guid.NewGuid(),Name="Product 2",Stock=10,Price=200,CreatedDate=DateTime.UtcNow},
+            //    new(){Id=Guid.NewGuid(),Name="Product 3",Stock=10,Price=300,CreatedDate=DateTime.UtcNow},
+            //    new(){Id=Guid.NewGuid(),Name="Product 4",Stock=10,Price=400,CreatedDate=DateTime.UtcNow}
+            //});
+            //await _productWriteRepository.SaveAsync();
 
-
-
-            });
+         Product p= await _productReadRepository.GetByIdAsync("a9f9edf1-7bc3-49ce-9f8a-e07b3f434bf4",false);
+            p.Name = "Mehmet";
             await _productWriteRepository.SaveAsync();
+            
 
         }
 
@@ -44,6 +46,8 @@ namespace ETicaretAPI.API.Controllers
             Product product=await _productReadRepository.GetByIdAsync(id);
             return Ok(product);
         }
+
+      
 
     }
 }
