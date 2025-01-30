@@ -469,19 +469,255 @@ namespace ETicaretAPI.Application.Repositories
 {
     public interface IWriteRepository<T>:IRepository<T> where T : BaseEntity
     {
+       using ETicaretAPI.Domain.Entities.Common;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ETicaretAPI.Application.Repositories
+{
+    public interface IWriteRepository<T> : IRepository<T> where T : BaseEntity
+    {
         Task<bool> AddAsync(T model);
-        Task<bool> AddAsync(List<T> model);
-        Task<bool> Remove(T model);
-        Task<bool> Remove(string Id);
-        Task<bool> UpdateAsync(T model);
-
-
+        Task<bool> AddRangeAsync(List<T> datas);
+        bool Remove(T model);
+        bool RemoveRange(List<T> datas);
+        Task<bool> RemoveAsync(string Id);
+        bool Update(T model);
+        Task<int> SaveAsync();
+    }
+}
     }
 }
 --------------------------
 
+Şimdi ReadRepository ve WriteRepository de şu şekilde oluşturuyoruz.
+----------------------------
+using ETicaretAPI.Application.Repositories;
+using ETicaretAPI.Domain.Entities.Common;
+using ETicaretAPI.Persistence.Contexts;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ETicaretAPI.Persistence.Repositories
+{
+    public class ReadRepository<T> : IReadRepository<T> where T : BaseEntity
+    {
+        private readonly ETicaretAPIDbContext _context;
+        public ReadRepository(ETicaretAPIDbContext context)
+        {
+            _context = context;
+        }
+        public DbSet<T> Table => _context.Set<T>();
+        public IQueryable<T> GetAll()
+            => Table;
+        public IQueryable<T> GetWhere(Expression<Func<T, bool>> method)
+            =>Table.Where(method);      
+        public async Task<T> GetSingleAsync(Expression<Func<T, bool>> method)
+            =>await Table.FirstOrDefaultAsync(method);
+        public async Task<T> GetByIdAsync(string id)
+            => await Table.FirstOrDefaultAsync(data => data.Id == Guid.Parse(id));
+    }
+}
+----------------------------
+using ETicaretAPI.Application.Repositories;
+using ETicaretAPI.Domain.Entities.Common;
+using ETicaretAPI.Persistence.Contexts;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ETicaretAPI.Persistence.Repositories
+{
+    public class WriteRepository<T> : IWriteRepository<T> where T : BaseEntity
+    {
+        private readonly ETicaretAPIDbContext _context;
+        public WriteRepository(ETicaretAPIDbContext context)
+        {
+            _context = context;
+        }
+        public DbSet<T> Table => _context.Set<T>();
+        public async Task<bool> AddAsync(T model)
+        {
+         EntityEntry<T> entityEntry=  await Table.AddAsync(model);
+            return entityEntry.State == EntityState.Added;            
+        }
+        public async Task<bool> AddRangeAsync(List<T> datas)
+        {
+            await Table.AddRangeAsync(datas);
+            return true;
+        }
+        public bool Remove(T model)
+        {
+            EntityEntry<T> entityEntry= Table.Remove(model);
+            return entityEntry.State == EntityState.Deleted;
+        }
+        public bool RemoveRange(List<T> datas)
+        {
+            Table.RemoveRange(datas);
+            return true;
+        }
+        public async Task<bool> RemoveAsync(string id)
+        {
+           T model= await Table.FirstOrDefaultAsync(data=>data.Id==Guid.Parse(id));
+            return Remove(model);
+        }
+        public bool Update(T model)
+        {
+            EntityEntry<T> entityEntry=Table.Update(model);
+            return entityEntry?.State == EntityState.Modified;
+        }
+        public async Task<int> SaveAsync()
+            =>await _context.SaveChangesAsync();
+    }
+}
+---------------------------
+Şimdi yapılacak şey entity lere uygun repository arayüzlerini oluşturmak ve bunların somut nesnelerini oluşturmak Arayüzler için Application katmanında Repository klasörünün içine her bir entity için bir klasör açıyoruz ama açarken entity ismi veriyorsak entity ismi ile aynı olmamsı için çoğul klasör ismi kullanıyoruz aksi taktirde entitylerle namespace isimleri aynı olduğunda entitylere erişemeyiz aynı mantıkla persistence katmanı içinde repositories klasöründe entity isimlerinin çoğul halleriyle klasör açıyoruz.
+
+her bir entity için arayüz isimleri ICustomerReadRepository ve ICustomerWriteRepository(Customer için) diğer entityler içinde aynı mantıkla 2 interface oluşturuyoruz. 
+persistence katmanındaki isimleri ise CustomerReadRepository ve CustomerWriteRepository(customer için) diğer entityler içinde aynı mantıkla 2 class oluşturuyoruz.
+
+Sadece customer için yapacağım diğerleri de aynı mantık
+----------------------------
+using ETicaretAPI.Domain.Entities;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ETicaretAPI.Application.Repositories.Customers
+{
+    public interface ICustomerReadRepository:IReadRepository<Customer>
+    {
+    }
+}
+-------------------------
+using ETicaretAPI.Domain.Entities;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ETicaretAPI.Application.Repositories.Customers
+{
+    public interface ICustomerWriteRepository:IWriteRepository<Customer>
+    {
+    }
+}
+--------------------------
+Somut nesneler
+----------------------------
+using ETicaretAPI.Application.Repositories.Customers;
+using ETicaretAPI.Domain.Entities;
+using ETicaretAPI.Persistence.Contexts;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ETicaretAPI.Persistence.Repositories.Customers
+{
+    public class CustomerReadRepository : ReadRepository<Customer>, ICustomerReadRepository
+    {
+        public CustomerReadRepository(ETicaretAPIDbContext context) : base(context)
+        {
+        }
+    }
+}
+------------------------
+using ETicaretAPI.Application.Repositories.Customers;
+using ETicaretAPI.Domain.Entities;
+using ETicaretAPI.Persistence.Contexts;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ETicaretAPI.Persistence.Repositories.Customers
+{
+    public class CustomerWriteRepository : WriteRepository<Customer>, ICustomerWriteRepository
+    {
+        public CustomerWriteRepository(ETicaretAPIDbContext context) : base(context)
+        {
+        }
+    }
+}
+---------------------------
+şimdi yapılması gereken IoC conteynıra burada yaptığımız yapılanmayı eklemek
+-------------------------
+AddSingleton yada scope olarak ekleyebiliriz biz scope olarak ekleyeceğiz
+------------------------
+using ETicaretAPI.Application.Repositories.Customers;
+using ETicaretAPI.Application.Repositories.Orders;
+using ETicaretAPI.Application.Repositories.Products;
+using ETicaretAPI.Persistence.Contexts;
+using ETicaretAPI.Persistence.Repositories.Customers;
+using ETicaretAPI.Persistence.Repositories.Orders;
+using ETicaretAPI.Persistence.Repositories.Products;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 
+namespace ETicaretAPI.Persistence
+{
+    public static class ServiceRegistration
+    {
+        public static void AddPersistenceServices(this IServiceCollection services)
+        {            
+            services.AddScoped<ICustomerReadRepository,CustomerReadRepository>();
+            services.AddScoped<ICustomerWriteRepository,CustomerWriteRepository>();
+            services.AddScoped<IOrderWriteRepository,OrderWriteRepository>();
+            services.AddScoped<IOrderReadRepository,OrderReadRepository>();
+            services.AddScoped<IProductReadRepository,ProductReadRepository>();
+            services.AddScoped<IProductWriteRepository,ProductWriteRepository>();
+           services.AddDbContext<ETicaretAPIDbContext>(options=>options.UseNpgsql(Configuration.ConnectionString));
+        }
+    }
+}
+--------------------------
+ve en son ProductControlleri şu şekilde düzenliyoruz bakalım ürünler geliyormu
+------------------------
+using ETicaretAPI.Application.Repositories.Products;
+using Microsoft.AspNetCore.Mvc;
+
+namespace ETicaretAPI.API.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class ProductsController : ControllerBase
+    {
+        private readonly IProductReadRepository _productReadRepository;
+        private readonly IProductWriteRepository _productWriteRepository;       
+        public ProductsController(IProductReadRepository productReadRepository, IProductWriteRepository productWriteRepository)
+        {
+            _productReadRepository = productReadRepository;
+            _productWriteRepository = productWriteRepository;
+        }
+        [HttpGet]
+        public IActionResult GetProducts() 
+        {
+        var result=_productReadRepository.GetAll();
+            return Ok(result);        
+        }
+    }
+}
+----------------------------
+Bunu yapınca ürünler listesi boş şekilde geliyor çünkü veritabanında ürün yok.
 
 
 
