@@ -916,7 +916,7 @@ namespace ETicaretAPI.Persistence.Repositories
 }
 
 ----------------------------
-
+Şimdi yine bir optimizasyon gerçekleştireceğiz bu optimizasyon veri ekleme işlemi ile olacak oda veri tabanına veri ekleme sırasında entitylerin ortak olan alanlarının merkezi bir yerden eklenmesi sağlanacak.
   
 
 
