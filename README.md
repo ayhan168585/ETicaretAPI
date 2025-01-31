@@ -916,7 +916,7 @@ namespace ETicaretAPI.Persistence.Repositories
 }
 
 ----------------------------
-Şimdi yine bir optimizasyon gerçekleştireceğiz bu optimizasyon veri ekleme işlemi ile olacak oda veri tabanına veri ekleme sırasında entitylerin ortak olan alanlarının merkezi bir yerden eklenmesi sağlanacak.
+Şimdi yine bir optimizasyon gerçekleştireceğiz bu optimizasyon veri ekleme işlemi ile olacak oda veri tabanına veri ekleme sırasında entitylerin ortak olan alanlarının merkezi bir yerden eklenmesi sağlanacak. Bu bir interceptor yoluyla olacak bu şu şekilde olacak diyelimki bir product eklemek istiyoruz. eklenme esnasında interceotor araya girecek ve diyecek ki (benzetme sanatıyla anlatıyorum.) bende ürüne ait şu verilerde var al bu verileride senin verilerine ekle ve öyle veritabanına gönder.
   
 
 
