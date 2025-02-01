@@ -916,7 +916,43 @@ namespace ETicaretAPI.Persistence.Repositories
 }
 
 ----------------------------
-Şimdi yine bir optimizasyon gerçekleştireceğiz bu optimizasyon veri ekleme işlemi ile olacak oda veri tabanına veri ekleme sırasında entitylerin ortak olan alanlarının merkezi bir yerden eklenmesi sağlanacak. Bu bir interceptor yoluyla olacak bu şu şekilde olacak diyelimki bir product eklemek istiyoruz. eklenme esnasında interceotor araya girecek ve diyecek ki (benzetme sanatıyla anlatıyorum.) bende ürüne ait şu verilerde var al bu verileride senin verilerine ekle ve öyle veritabanına gönder.
+Şimdi yine bir optimizasyon gerçekleştireceğiz bu optimizasyon veri ekleme işlemi ile olacak oda veri tabanına veri ekleme sırasında entitylerin ortak olan alanlarının merkezi bir yerden eklenmesi sağlanacak. Bu bir interceptor yoluyla olacak bu şu şekilde olacak diyelimki bir product eklemek istiyoruz. eklenme esnasında interceotor araya girecek ve diyecek ki (benzetme sanatıyla anlatıyorum.) bende ürüne ait şu verilerde var al bu verileride senin verilerine ekle ve öyle veritabanına gönder. BaseEntity'e bir property daha ekliyoruz. UpdatedDate adında bir property. Şimdi entityler ile ilgili herhangi bir değişiklik yapınca bunun sunucuya bildirilmesi gerekiyor. add-migration mig_2 komutunu veriyoruz çünkü mig_1 i daha önce yapmıştık update-database ile de değişikliğimizi veritabanına yansıtıyoruz. Şimdi yapacağımız iş eğer bir veri ilkkez ekleniyorsa createdDate'in eklenmesi eğer bir veri güncelleniyorsa updatedDate'in eklenmesini sağlıyoruz peki bunu nerede yapıyoruz Context nesnesi üzerinde savechangeAsync sırasında yapılan işlemi anlayarak ona uygun alanın veri tabanına eklenmesini sağlıyoruz bunu yapmak için tracker özelliğinden yararlanıyoruz.
+---------------------------
+using ETicaretAPI.Domain.Entities;
+using ETicaretAPI.Domain.Entities.Common;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ETicaretAPI.Persistence.Contexts
+{
+    public class ETicaretAPIDbContext : DbContext
+    {
+        public ETicaretAPIDbContext(DbContextOptions options) : base(options)
+        {
+        }
+        public DbSet<Product> Products { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<Customer> Customers { get; set; }
+        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            var datas = ChangeTracker.Entries<BaseEntity>();
+            foreach (var data in datas)
+            {
+                _ = data.State switch (Burada boş eşleme yapıyoruz.)
+                {
+                    EntityState.Added => data.Entity.CreatedDate=DateTime.UtcNow,
+                    EntityState.Modified=>data.Entity.UpdatedDate=DateTime.UtcNow,
+                };
+            }
+            return await base.SaveChangesAsync(cancellationToken);
+        }
+    }
+}
+
   
 
 
