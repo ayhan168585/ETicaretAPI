@@ -953,8 +953,107 @@ namespace ETicaretAPI.Persistence.Contexts
     }
 }
 --------------------------
-Bundan sonra hem client hemde backend üzerinde işlem yapacağız. ilgili klasörde ki bizim için ProjelerinAngularHali adlı klasör  ng new ETicaretClient --no-standalone ile EticaretClient adında bir proje oluşturuyoruz. ve visualcode ile açıyoruz. (Bunun için oluşan ETicaretClient klasörüne gidip cmd yi açmak ve code . komutunu vermek) Angularda oluşturduğumuz yapı hem Admin hemde kullancı kısmının bulunduğu multi-layout bir yapı oluşturacağız. Admin kısmında Material UI kısmında bootstrap kullanacağız. Admin kısmında Product,Order,Customer,Dashboard sayfaları olacak UI kısmında Product,Home,Basket sayfaları olacak. Şimdi bizim anabir modülümüz var AppModule bu modülde angular içinde kullanılan tüm modül ve componentlerin declare ve importları mevcut olmalıdır. Biz burada modüler bir yapı kullanarak oluşum yapacağız. Bu sebeple öncelikle 2 modül oluşturacağız Admin modülü ve UI modülü. Angularda bir modüle yada component oluşturmak istediğimizde öncelikle klasörünü oluşturur ve içine oluşturmak istediğimiz module yada componenti oluşturur. Şimdi addmin modülünü oluşturalım komut satırımız şu şekilde olacak ng generate module admin yada bunun kısaltmalarıyla ng g m admin şeklinde oluşturulur. bunu yapınca önce admin klasörü oluşturulur ve içine admin modülü oluşturulur. Aynı şekilde ng g m ui ile UI modülünü oluşturuyoruz.
-  
+Bundan sonra hem client hemde backend üzerinde işlem yapacağız. ilgili klasörde ki bizim için ProjelerinAngularHali adlı klasör  ng new ETicaretClient --no-standalone ile EticaretClient adında bir proje oluşturuyoruz. ve visualcode ile açıyoruz. (Bunun için oluşan ETicaretClient klasörüne gidip cmd yi açmak ve code . komutunu vermek) Angularda oluşturduğumuz yapı hem Admin hemde kullancı kısmının bulunduğu multi-layout bir yapı oluşturacağız. Admin kısmında Material UI kısmında bootstrap kullanacağız. Admin kısmında Product,Order,Customer,Dashboard sayfaları olacak UI kısmında Product,Home,Basket sayfaları olacak. Şimdi bizim anabir modülümüz var AppModule bu modülde angular içinde kullanılan tüm modül ve componentlerin declare ve importları mevcut olmalıdır. Biz burada modüler bir yapı kullanarak oluşum yapacağız. Bu sebeple öncelikle 2 modül oluşturacağız Admin modülü ve UI modülü. Angularda bir modüle yada component oluşturmak istediğimizde öncelikle klasörünü oluşturur ve içine oluşturmak istediğimiz module yada componenti oluşturur. Şimdi addmin modülünü oluşturalım komut satırımız şu şekilde olacak ng generate module admin yada bunun kısaltmalarıyla ng g m admin şeklinde oluşturulur. bunu yapınca önce admin klasörü oluşturulur ve içine admin modülü oluşturulur. Aynı şekilde ng g m ui ile UI modülünü oluşturuyoruz. Şimdi biz sitenin adresini yazdığımızda ilk açılacak ekran UI ekranı olacak. ng g m admin/layout adında bir layout oluşturacağız. Böylece admin klasörü altında layout isimli bir modül oluşacak adminmodule içine layoutmodülün import edilmesi gerekir. Layout içinde bir layout componentimiz olması gerekiyor. Bir componentin kullanılabilmesi için uygulamanın ana modülüne(app.module) declare edilmesi gerekir. Bu sebeple öncelikle kendisine en yakın modüle (Layout component için bu layout modül) declare edilir. Layout modül admin modüle import edilecek admin modülde app modüle import edilecek ve böylece hiyerarşik olaral layout component admin modüle tanıtılmış olacak. Layout modül içinde yönetim panelinin componentleri olacak peki bunu nasıl yapıyoruz. eğer bir şeyin componentleri olacaksa önece components isimli bir modül oluşturup içine componentleri oluşturacağız ng g m admin/layout/components komutu ile components modülünü oluşturuyoruz. Şimdi bunun içine componentleri oluşturacağız. Bu compoenentlerden biri header ng g c admin/layout/components/header komutu ile header adında component oluşturuyoruz. Şimdi bu component en yakın modül olan component modüle eklendi component modülüde layout modüle ekliyoruz. şimdi bir de sidebar component oluşturuyoruz. Birde footer adında compoenent oluşturuyoruz. Bizim component modüldeki header,sidebar ve footer componentlerini layout component de selector olarak kullanılabilmesi için component modülün export edilmesi gerekir şimdi sırayla öncelikle headercomponenti componentmodüle export ediyoruz daha sonra  layout modülde layout componenti export ediyoruz. admin modülde layout modülü export ediyoruz. ve en son olarak app modülde de admin modülün import edilmesi gerekiyor.
+--------------------------------
+components.module
+-------------------
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { HeaderComponent } from './header/header.component';
+import { SidebarComponent } from './sidebar/sidebar.component';
+import { FooterComponent } from './footer/footer.component';
+
+
+
+@NgModule({
+  declarations: [
+    HeaderComponent,
+    SidebarComponent,
+    FooterComponent
+  ],
+  imports: [
+    CommonModule
+  ],
+ exports:[
+  HeaderComponent
+
+ ]
+})
+export class ComponentsModule { }
+---------------------------------
+
+layout.Module
+----------------
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { LayoutComponent } from './layout.component';
+import { ComponentsModule } from './components/components.module';
+
+
+
+@NgModule({
+  declarations: [
+    LayoutComponent
+  ],
+  imports: [
+    CommonModule,
+    ComponentsModule
+  ],
+  exports:[
+    LayoutComponent
+  ]
+  })
+
+export class LayoutModule { }
+--------------------------------
+admin.Module
+-------------
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { LayoutModule } from './layout/layout.module';
+
+
+
+@NgModule({
+  declarations: [],
+  imports: [
+    CommonModule,
+    LayoutModule
+  ],
+  exports:[
+     LayoutModule
+   ]
+})
+
+export class AdminModule { }
+-------------------------------
+app.module
+-------------
+import { NgModule } from '@angular/core';
+import { BrowserModule, provideClientHydration, withEventReplay } from '@angular/platform-browser';
+
+import { AppRoutingModule } from './app-routing.module';
+import { AppComponent } from './app.component';
+import { AdminModule } from './admin/admin.module';
+
+@NgModule({
+  declarations: [
+    AppComponent
+  ],
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    AdminModule
+  ],
+ 
+  providers: [
+    provideClientHydration(withEventReplay())
+  ],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
+-------------------------------
+Böylece Layout Modüle app modül tarafından tanınır.
 
 
 
