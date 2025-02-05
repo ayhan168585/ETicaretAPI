@@ -1099,7 +1099,7 @@ import { ComponentsModule } from './components/components.module';
 
 export class AdminModule { }
 -------------------------------
-Böylece hiyararşik olarak componentler modüle declare edildi modülde bir üst modüle o da bir üst modüle import edildi.
+Böylece hiyararşik olarak componentler modüle declare edildi modülde bir üst modüle o da bir üst modüle import edildi. Admin kısmının alt yapısı tamamlandı şimdi UI kısmını yapalım.UI kısmında layout denen altyapıyı oluşturmaya gerek yok çünkü uygulamanın default layoutunu kullanacak çünkü ilk açılacak kısım UI kısım olacak.Direkt components kısımlarını oluşturup devam edeceğiz. ng g m ui/components komutuyla UI içinde components modülü oluşturuyoruz. Bunun içine önce products modülü ve içine de products componenti oluşturuyoruz. Orderlarla ilgili kullanıcıya gösterilen sayfada bir şey göstermeye gerek yok.(Gösterilmemeli) Örneğin ne olabilir sepet olabilir ana sayfa olabilir bunlarıda oluşturuyoruz aynı mantıkla önce modül içine component. Böylece hem Admin hemde UI kısmının alt yapısını oluşturduk şimdi multiple layout altyapısını oluşturalım.
 
 
 
