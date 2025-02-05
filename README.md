@@ -1099,7 +1099,78 @@ import { ComponentsModule } from './components/components.module';
 
 export class AdminModule { }
 -------------------------------
-Böylece hiyararşik olarak componentler modüle declare edildi modülde bir üst modüle o da bir üst modüle import edildi. Admin kısmının alt yapısı tamamlandı şimdi UI kısmını yapalım.UI kısmında layout denen altyapıyı oluşturmaya gerek yok çünkü uygulamanın default layoutunu kullanacak çünkü ilk açılacak kısım UI kısım olacak.Direkt components kısımlarını oluşturup devam edeceğiz. ng g m ui/components komutuyla UI içinde components modülü oluşturuyoruz. Bunun içine önce products modülü ve içine de products componenti oluşturuyoruz. Orderlarla ilgili kullanıcıya gösterilen sayfada bir şey göstermeye gerek yok.(Gösterilmemeli) Örneğin ne olabilir sepet olabilir ana sayfa olabilir bunlarıda oluşturuyoruz aynı mantıkla önce modül içine component. Böylece hem Admin hemde UI kısmının alt yapısını oluşturduk şimdi multiple layout altyapısını oluşturalım.
+Böylece hiyararşik olarak componentler modüle declare edildi modülde bir üst modüle o da bir üst modüle import edildi. Admin kısmının alt yapısı tamamlandı şimdi UI kısmını yapalım.UI kısmında layout denen altyapıyı oluşturmaya gerek yok çünkü uygulamanın default layoutunu kullanacak çünkü ilk açılacak kısım UI kısım olacak.Direkt components kısımlarını oluşturup devam edeceğiz. ng g m ui/components komutuyla UI içinde components modülü oluşturuyoruz. Bunun içine önce products modülü ve içine de products componenti oluşturuyoruz. Orderlarla ilgili kullanıcıya gösterilen sayfada bir şey göstermeye gerek yok.(Gösterilmemeli) Örneğin ne olabilir sepet olabilir ana sayfa olabilir bunlarıda oluşturuyoruz aynı mantıkla önce modül içine component. Böylece hem Admin hemde UI kısmının alt yapısını oluşturduk şimdi multiple layout altyapısını oluşturalım. Bunu şu şekilde yapacağız kaç tane layout kullanırsak kullanalım bu layoutların herbirindeki componentlere rota belirleyeceğiz.Add routing den değil oradanda yapabiliriz ama biz modüle bağlı componentler üzerinden tanımlayacağız. Örneğin admindeki Customer module şu şekilde rota veriyoruz.
+-----------------------------
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { CustomersComponent } from './customers/customers.component';
+import { RouterModule } from '@angular/router';
+
+
+
+@NgModule({
+  declarations: [
+    CustomersComponent
+  ],
+  imports: [
+    CommonModule,
+    RouterModule.forChild([
+      {path:"",component:CustomersComponent}
+    ])
+  ]
+})
+export class CustomersModule { }
+---------------------------------
+diğer componentler için de rotaları aynı şekilde oluşturuyoruz. UI Kısım içinde oluşturuyoruz. Her bir componente modül seviyesinde bir rota belirledik. Birinci aşama componentlerin kendi modüllerinde rotalanmasıydı bu bitti Şimdi ikinci aşamaya geçiyoruz.İkinci aşama Bu kendi modüllerinde yapılan rotalandırmanın ana modülde yapılmasıdır. Bunu şu şekilde yapıyoruz ana layout dışında kalan layoutları rotalandırıyoruz en son ana layoutu rotalandırıyoruz. app.routing de admin rotalarını şu şekilde oluşturuyoruz.
+---------------------------------
+import { NgModule } from '@angular/core';
+import { RouterModule, Routes } from '@angular/router';
+import { LayoutComponent } from './admin/layout/layout.component';
+
+const routes: Routes = [
+  {
+    path: 'admin',
+    component: LayoutComponent,
+    children: [
+      {
+        path: 'customers',
+        loadChildren: () =>
+          import('./admin/components/customers/customers.module').then(
+            (module) => module.CustomersModule
+          ),
+      },
+      {
+        path: 'dashboard',
+        loadChildren: () =>
+          import('./admin/components/dashboard/dashboard.module').then(
+            (module) => module.DashboardModule
+          ),
+      },
+      {
+        path: 'orders',
+        loadChildren: () =>
+          import('./admin/components/orders/orders.module').then(
+            (module) => module.OrdersModule
+          ),
+      },
+      {
+        path: 'products',
+        loadChildren: () =>
+          import('./admin/components/products/products.module').then(
+            (module) => module.ProductsModule
+          ),
+      },
+    ],
+  },
+];
+
+@NgModule({
+  imports: [RouterModule.forRoot(routes)],
+  exports: [RouterModule],
+})
+export class AppRoutingModule {}
+-----------------------------------
+
 
 
 
