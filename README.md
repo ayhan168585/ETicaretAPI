@@ -1191,7 +1191,49 @@ export class AppRoutingModule {}
 -----------------------------------
  {path:"",component:DashboardComponent}, bir layoutun ana sayfasında kullanılacak component direk bu şekilde tanımlanır eğer admin ana sayfası istenirse dashboard gelsin demektir bu.
 
-Ana layout da ise obje olarak ve direkt component olarak tanımlanır.
+Ana layout da ise obje olarak ve direkt component olarak tanımlanır. Böylece route alt yapısıda tamamlandı yeni componentler olursa onlarında eklenmesi gerekiyor. son olarak bunu app.component.html de şu şekilde kullanıyoruz.
+-----------------------------------
+<a routerLink="">Home</a><a routerLink="products">Products</a
+><a routerLink="basket">Basket</a><a routerLink="admin">Admin</a>
+
+<br>
+<router-outlet></router-outlet>
+------------------------------
+buradaki <router-outlet></router-outlet> ile sayfalar gösteriliyor. Bir sayfada <router-outlet></router-outlet> in kullanılabilmesi için bağlı olduğu modülde RouterModülün import edilmesi gereklidir. Layout.component.html dosyasını şu şekilde kullanıyoruz.
+-------------------------------
+<app-header></app-header>
+<app-sidebar></app-sidebar>
+<app-footer></app-footer>
+
+<router-outlet></router-outlet>
+---------------------------------------
+burada <router-outlet><router-outlet> in kullanılabilmesi için layout modüle RouterModülün eklenmesi gerekir.
+----------------------------------
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { LayoutComponent } from './layout.component';
+import { ComponentsModule } from './components/components.module';
+import { RouterModule } from '@angular/router';
+
+
+
+@NgModule({
+  declarations: [
+    LayoutComponent
+  ],
+  imports: [
+    CommonModule,
+    ComponentsModule,
+    RouterModule
+  ],
+  exports:[
+    LayoutComponent
+  ]
+  })
+
+export class LayoutModule { }
+-------------------------------
+
 
 
 
