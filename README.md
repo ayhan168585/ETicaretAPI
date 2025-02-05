@@ -1313,22 +1313,32 @@ diğer kullanacağımız componentler de buna benzer eklenecek. Ama bunu ekleyin
   }
   --------------------------
   Bunu da ekleyince görüntü düzeliyor. Biz burada ifadeleri kendimize uygun şekilde düzeltiyoruz.
-  -----------------------------
-  <mat-drawer-container class="admin-container">
-    <mat-drawer mode="side" opened>Drawer content</mat-drawer>
-    <mat-drawer-content>Main content</mat-drawer-content>
+  -------------------------------
+<app-header></app-header>
+<mat-drawer-container class="admin-container">
+    <mat-drawer mode="side" opened class="admin-left"><app-sidebar></app-sidebar></mat-drawer>
+    <mat-drawer-content><router-outlet></router-outlet></mat-drawer-content>
   </mat-drawer-container>
+  <app-footer></app-footer>
   ----------------------------
-  .admin-container {
+ .admin-container {
     width: auto;
-    height: 200px;
+    height: 600px;
     margin: 10px;
     border: 1px solid #555;
     /* The background property is added to clearly distinguish the borders between drawer and main
        content */
     background: #eee;
   }
-  -------------------------------
+
+  .admin-left{
+    width: 250px;
+  }
+  ---------------------------
+  Burada kullandığımız sidebar içinde sidebar componentini kullanmak istiyoruz.
+  -----------------------------
+  Bunu yapınca sol tarafta görünen sidebar daki ifadelere tıklayınca sağda o sayfa ile ilgili veri gelir. Admin ile ilgili material altyapısını oluşturduk. Şimdi UI kısmı için Bootstrap altyapısını düzenleyeceğiz.
+  
   
 
 
