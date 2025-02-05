@@ -1126,12 +1126,15 @@ diğer componentler için de rotaları aynı şekilde oluşturuyoruz. UI Kısım
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { LayoutComponent } from './admin/layout/layout.component';
+import { DashboardComponent } from './admin/components/dashboard/dashboard/dashboard.component';
+import { HomeComponent } from './ui/components/home/home/home.component';
 
 const routes: Routes = [
   {
     path: 'admin',
     component: LayoutComponent,
     children: [
+      { path: '', component: DashboardComponent },
       {
         path: 'customers',
         loadChildren: () =>
@@ -1162,6 +1165,21 @@ const routes: Routes = [
       },
     ],
   },
+  { path: '', component: HomeComponent },
+  {
+    path: 'basket',
+    loadChildren: () =>
+      import('./ui/components/baskets/baskets.module').then(
+        (module) => module.BasketsModule
+      ),
+  },
+  {
+    path: 'products',
+    loadChildren: () =>
+      import('./ui/components/products/products.module').then(
+        (module) => module.ProductsModule
+      ),
+  },
 ];
 
 @NgModule({
@@ -1169,10 +1187,11 @@ const routes: Routes = [
   exports: [RouterModule],
 })
 export class AppRoutingModule {}
+
 -----------------------------------
+ {path:"",component:DashboardComponent}, bir layoutun ana sayfasında kullanılacak component direk bu şekilde tanımlanır eğer admin ana sayfası istenirse dashboard gelsin demektir bu.
 
-
-
+Ana layout da ise obje olarak ve direkt component olarak tanımlanır.
 
 
 
