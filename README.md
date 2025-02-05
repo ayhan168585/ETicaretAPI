@@ -1053,7 +1053,53 @@ import { AdminModule } from './admin/admin.module';
 })
 export class AppModule { }
 -------------------------------
-Böylece Layout Modüle app modül tarafından tanınır. Aynı uygulamayı sidebar ve footer içinde yapıyoruz. Layout componentlerinin yanında admin kısmındada product,order vb. componentlerimiz olacak ama bu adminin içinde olacak bu sebeple admin içinde components adında bir modül oluşturuyoruz. ng g m admin/components böylece admin içinde components modülünü oluşturduk şimdi bunun içinde products,orders vb. componentleri oluşturacağız ama bunuda önce components içinde products modülünü oluşturup içine products componentini oluşturacağız diğerleri içinde aynı şekilde bir uygulama yapacağız. ng g m admin/components/products komutu ile admin/components içinde products modülünü oluşturuyoruz.
+Böylece Layout Modüle app modül tarafından tanınır. Aynı uygulamayı sidebar ve footer içinde yapıyoruz. Layout componentlerinin yanında admin kısmındada product,order vb. componentlerimiz olacak ama bu adminin içinde olacak bu sebeple admin içinde components adında bir modül oluşturuyoruz. ng g m admin/components böylece admin içinde components modülünü oluşturduk şimdi bunun içinde products,orders vb. componentleri oluşturacağız ama bunuda önce components içinde products modülünü oluşturup içine products componentini oluşturacağız diğerleri içinde aynı şekilde bir uygulama yapacağız. ng g m admin/components/products komutu ile admin/components içinde products modülünü oluşturuyoruz. Bu oluşturduğumuz modülleri components modüle import ediyoruz.
+-----------------------------
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ProductsModule } from './products/products.module';
+import { OrdersModule } from './orders/orders.module';
+import { CustomersModule } from './customers/customers.module';
+import { DashboardModule } from './dashboard/dashboard.module';
+
+
+
+@NgModule({
+  declarations: [],
+  imports: [
+    CommonModule,
+    ProductsModule,
+    OrdersModule,
+    CustomersModule,
+    DashboardModule
+  ]
+})
+export class ComponentsModule { }
+------------------------------------
+components modülde bir üst modül olan admin modüle eklenir.
+---------------------------
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { LayoutModule } from './layout/layout.module';
+import { ComponentsModule } from './components/components.module';
+
+
+
+@NgModule({
+  declarations: [],
+  imports: [
+    CommonModule,
+    LayoutModule,
+    ComponentsModule
+  ],
+  exports:[
+     LayoutModule
+   ]
+})
+
+export class AdminModule { }
+-------------------------------
+Böylece hiyararşik olarak componentler modüle declare edildi modülde bir üst modüle o da bir üst modüle import edildi.
 
 
 
