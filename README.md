@@ -1053,7 +1053,7 @@ import { AdminModule } from './admin/admin.module';
 })
 export class AppModule { }
 -------------------------------
-Böylece Layout Modüle app modül tarafından tanınır.
+Böylece Layout Modüle app modül tarafından tanınır. Aynı uygulamayı sidebar ve footer içinde yapıyoruz. Layout componentlerinin yanında admin kısmındada product,order vb. componentlerimiz olacak ama bu adminin içinde olacak bu sebeple admin içinde components adında bir modül oluşturuyoruz. ng g m admin/components böylece admin içinde components modülünü oluşturduk şimdi bunun içinde products,orders vb. componentleri oluşturacağız ama bunuda önce components içinde products modülünü oluşturup içine products componentini oluşturacağız diğerleri içinde aynı şekilde bir uygulama yapacağız. ng g m admin/components/products komutu ile admin/components içinde products modülünü oluşturuyoruz.
 
 
 
