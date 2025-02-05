@@ -1264,7 +1264,72 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 export class AppModule { }
 --------------------------------
 
+Admin kısmının tasarımında Material UI kısmının tasarımında Bootstrap kullanacağız. Şimdi bu altyapıyı ekleyelim. Öncelikle material install edilecek ng add @angular/material
+komutuyla install ediyoruz orada bize tasarım seçimiyle ilgili sorular soracak sonra daha sonra bir componenti kullanmak istersek örnek olarak layout.html de sidenav componentini kullanalim öncelikle html sayfasına 
+--------------------------------
+<mat-drawer-container class="example-container">
+    <mat-drawer mode="side" opened>Drawer content</mat-drawer>
+    <mat-drawer-content>Main content</mat-drawer-content>
+  </mat-drawer-container>
+  ----------------------------
+  ama buradaki kütüphaneleri kullanabilmek için https://material.angular.io/components/sidenav/api sayfasındaki https://material.angular.io/components/sidenav/api kodu html sayfası hangi modüle bağlıysa bu import oraya import edilecek burada layoutModule
+  -----------------------------
+  import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { LayoutComponent } from './layout.component';
+import { ComponentsModule } from './components/components.module';
+import { RouterModule } from '@angular/router';
+import {MatSidenavModule} from '@angular/material/sidenav';
 
+
+
+@NgModule({
+  declarations: [
+    LayoutComponent
+  ],
+  imports: [
+    CommonModule,
+    ComponentsModule,
+    RouterModule,
+    MatSidenavModule
+  ],
+  exports:[
+    LayoutComponent
+  ]
+  })
+
+export class LayoutModule { }
+---------------------------
+diğer kullanacağımız componentler de buna benzer eklenecek. Ama bunu ekleyince hala eksik olan bir şey var onuda material sayfasındaki sidenav kısmında görüyoruz ve css de eklememiz gereken kodu söylüyor bunu da layout.compoennet.css dosyasına ekliyoruz.
+--------------------------
+.example-container {
+    width: auto;
+    height: 200px;
+    margin: 10px;
+    border: 1px solid #555;
+    /* The background property is added to clearly distinguish the borders between drawer and main
+       content */
+    background: #eee;
+  }
+  --------------------------
+  Bunu da ekleyince görüntü düzeliyor. Biz burada ifadeleri kendimize uygun şekilde düzeltiyoruz.
+  -----------------------------
+  <mat-drawer-container class="admin-container">
+    <mat-drawer mode="side" opened>Drawer content</mat-drawer>
+    <mat-drawer-content>Main content</mat-drawer-content>
+  </mat-drawer-container>
+  ----------------------------
+  .admin-container {
+    width: auto;
+    height: 200px;
+    margin: 10px;
+    border: 1px solid #555;
+    /* The background property is added to clearly distinguish the borders between drawer and main
+       content */
+    background: #eee;
+  }
+  -------------------------------
+  
 
 
 
