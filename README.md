@@ -1337,7 +1337,20 @@ diğer kullanacağımız componentler de buna benzer eklenecek. Ama bunu ekleyin
   ---------------------------
   Burada kullandığımız sidebar içinde sidebar componentini kullanmak istiyoruz.
   -----------------------------
-  Bunu yapınca sol tarafta görünen sidebar daki ifadelere tıklayınca sağda o sayfa ile ilgili veri gelir. Admin ile ilgili material altyapısını oluşturduk. Şimdi UI kısmı için Bootstrap altyapısını düzenleyeceğiz.
+  Bunu yapınca sol tarafta görünen sidebar daki ifadelere tıklayınca sağda o sayfa ile ilgili veri gelir. Admin ile ilgili material altyapısını oluşturduk. Şimdi UI kısmı için Bootstrap altyapısını düzenleyeceğiz. npm install bootstrap@5.3.3 komutuyla bootstrapin 5.3.3 versiyonunu yüklüyoruz. npm üzerinden yüklenilen paketler node_module klasörüne yüklenir. yüklendikten sonra node_module klasörü içinde bootstrap klasöründeki dist klasöründe css klasöründe css ler kullanılır ve js klasörü içindeki javascriptler kullanılır. Bunlar angular.json dosyasında styles kısmına ve scripts kısmına eklenecek.
+  --------------------------------
+  "styles": [
+              "@angular/material/prebuilt-themes/azure-blue.css",
+              "src/styles.css",
+              "node_modules/bootstrap/dist/css/bootstrap.min.css"
+            ],
+            "scripts": [
+              "node_modules/bootstrap/dist/js/bootstrap.min.js",
+              "node_modules/@popperjs/core/dist/umd/popper.min.js",
+               "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
+            ],
+-----------------------------------
+Angular 19 da navbar seçilir menünün işlemesi için scripts kısmı bu şekilde düzenlenmeli. Angular üzerinde herhangi bir değişiklik yapılırsa angular ng serve ile tekrar başlatmak gerekir.
   
   
 
