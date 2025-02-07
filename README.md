@@ -1351,7 +1351,8 @@ diğer kullanacağımız componentler de buna benzer eklenecek. Ama bunu ekleyin
             ],
 -----------------------------------
 Angular 19 da navbar seçilir menünün işlemesi için scripts kısmı bu şekilde düzenlenmeli. Angular üzerinde herhangi bir değişiklik yapılırsa angular ng serve ile tekrar başlatmak gerekir.
-  
+ npm i jquery ile jquery de yüklüyoruz. angular.json dosyasında script kısmına "node_modules/jquery/dist/jquery.min.js" yapıştırılıyor.
+ 
   
 
 
