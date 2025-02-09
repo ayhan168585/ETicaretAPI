@@ -1351,7 +1351,202 @@ diğer kullanacağımız componentler de buna benzer eklenecek. Ama bunu ekleyin
             ],
 -----------------------------------
 Angular 19 da navbar seçilir menünün işlemesi için scripts kısmı bu şekilde düzenlenmeli. Angular üzerinde herhangi bir değişiklik yapılırsa angular ng serve ile tekrar başlatmak gerekir.
- npm i jquery ile jquery de yüklüyoruz. angular.json dosyasında script kısmına "node_modules/jquery/dist/jquery.min.js" yapıştırılıyor.
+ npm i jquery ile jquery de yüklüyoruz. angular.json dosyasında script kısmına "node_modules/jquery/dist/jquery.min.js" yapıştırılıyor.Angular için alt yapımızı büyük oranda tamamladık bir kaç kütüphane daha yükleyip anguları daha güzel hale getireceğiz. Bunlardan birisi de alertify alertify ile dialog pencereleri yada notification pencereleri oluşturacağız. Ama bunu biz bu projede sadece admin kısmında ve sadece notification kısmını kullanacağız. npm install alertifyjs --save komutu ile yüklüyoruz ve node_module içinde alertify içinde build içinde 
+ alertify.min.js dosyasını bularak sağ tıklıyoruz ve copy relative path ile yolunu kopyalıyoruz ve angular.json dosyasında script kısmına yapıştırıyoruz ancak yapıştırdığımızda slash lar ters olarak geliyor ve biz onları   "node_modules/alertifyjs/build/alertify.min.js" şeklinde düzelterek son haline getiriyoruz. aynı şekilde css dosyalarınıda css klasöründen alarak styles kısmına yapıştırıyoruz. Son olarak birde tema seçerek styles kısmına yapıştıralım biz burada semantic seçtik
+ ---------------------------
+   "styles": [
+              "@angular/material/prebuilt-themes/azure-blue.css",
+              "src/styles.css",
+              "node_modules/bootstrap/dist/css/bootstrap.min.css",
+              "node_modules/alertifyjs/build/css/alertify.min.css",
+              "node_modules/alertifyjs/build/css/themes/semantic.min.css"
+            ],
+            "scripts": [
+              "node_modules/bootstrap/dist/js/bootstrap.min.js",
+              "node_modules/@popperjs/core/dist/umd/popper.min.js",
+              "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js",
+              "node_modules/jquery/dist/jquery.min.js",
+              "node_modules/alertifyjs/build/alertify.min.js"
+--------------------------------
+Şimdi biz bu alertify'i kullanımımıza uygun hale getireceğiz. Bu ve bunun gibi kütüphaneleri kendimize uygun hale getirmek için bir servis oluşturuyoruz. https://alertifyjs.com/notifier.html dökümantasyon sayfasında kullanabileceğimiz metotlar yazmakta Şimdi bir servis yazacağız. şöyle bir strateji uygulayacağız uygulamamızda ana dizinde app klasöründe services adında bir klasör olacak ve altında admin ve ui adında iki klasör olacak adminde kullanacağım servisleri admine ui da kullanacağım servisleri ui kısmına yazacağız. yada her ikisinde birden kullanacağımız commen klasörü olacak. ng g s services/admin/alertify komutu ile services klasöründe bir admin klasörü oluşuyor ve içinde alertify adında bir class oluşuyor. 
+-------------------------------
+import { Injectable } from '@angular/core';
+declare var alertify:any
+
+@Injectable({
+  providedIn: 'root'
+})
+export class AlertifyService {
+
+  constructor() { }
+
+  message(message:string,messageType:MessageType){
+    alertify[messageType](message)
+  }
+}
+
+export enum MessageType{
+  Error="error",
+  Message="message",
+  Notify="notify",
+  Success="success",
+  Warning="warning"
+
+}
+-----------------------------------
+Bunu kullanmak istediğimiz herhangi conponent.ts dosyasında servisi çağırarak kullanabiliriz. Şimdi Layout.component.ts dosyasında servis çağırarak kullanıyoruz.
+---------------------------------
+import { Component, OnInit } from '@angular/core';
+import { AlertifyService, MessageType } from '../../services/admin/alertify.service';
+
+@Component({
+  selector: 'app-layout',
+  standalone: false,
+  
+  templateUrl: './layout.component.html',
+  styleUrl: './layout.component.css'
+})
+export class LayoutComponent implements OnInit {
+  constructor(private alertifyService:AlertifyService){}
+  ngOnInit(): void {
+ this.alertifyService.message("Başarılı",MessageType.Success)
+  }
+
+}
+--------------------------------
+pozisyonu için https://alertifyjs.com/notifier/position.html sayfasında  alertify.set('notifier','position', 'bottom-right'); şeklinde kullanılacağı söylenmektedir alertify.service dosyasında şu şekilde değişiklik yapıyoruz.
+------------------------------
+import { Injectable } from '@angular/core';
+declare var alertify:any
+
+@Injectable({
+  providedIn: 'root'
+})
+export class AlertifyService {
+
+  constructor() { }
+
+  message(message:string,messageType:MessageType,position:Position){
+    alertify.set('notifier','position', position);
+    alertify[messageType](message)   
+    
+  }
+}
+
+export enum MessageType{
+  Error="error",
+  Message="message",
+  Notify="notify",
+  Success="success",
+  Warning="warning"
+
+}
+
+export enum Position{
+  TopCenter="top-center",
+  TopRight="top-right",
+  TopLeft="top-left",
+  BottomCenter="bottom-center",
+  BottomRight="bottom-right",
+  BottomLeft="bottom-left"
+}
+-------------------------------
+Layout.component.ts dosyasında şu şekilde kullanıyoruz.
+----------------------------
+import { Component, OnInit } from '@angular/core';
+import { AlertifyService, MessageType, Position } from '../../services/admin/alertify.service';
+
+@Component({
+  selector: 'app-layout',
+  standalone: false,
+  
+  templateUrl: './layout.component.html',
+  styleUrl: './layout.component.css'
+})
+export class LayoutComponent implements OnInit {
+  constructor(private alertifyService:AlertifyService){}
+  ngOnInit(): void {
+ this.alertifyService.message("Başarılı",MessageType.Success,Position.TopCenter)
+  }
+
+}
+-------------------------------
+özelleştirmeye devam ediyoruz https://alertifyjs.com/notifier/delay.html sayfasında notificationun ne kadar süre kalacağı belirtilmekte ayrıca birde dismissAll özelliği var. Açılan tüm notification ların hepsini kapatır.
+-----------------------------
+import { Injectable } from '@angular/core';
+declare var alertify:any
+
+@Injectable({
+  providedIn: 'root'
+})
+export class AlertifyService {
+
+  constructor() { }
+
+  message(message:string,messageType:MessageType,position:Position,delay:number){
+    alertify.set('notifier','delay', delay);
+
+    alertify.set('notifier','position', position);
+
+    alertify[messageType](message)    
+    
+  }
+  
+  dismiss(){
+    alertify.dismissAll();
+  }
+}
+
+export enum MessageType{
+  Error="error",
+  Message="message",
+  Notify="notify",
+  Success="success",
+  Warning="warning"
+
+}
+
+export enum Position{
+  TopCenter="top-center",
+  TopRight="top-right",
+  TopLeft="top-left",
+  BottomCenter="bottom-center",
+  BottomRight="bottom-right",
+  BottomLeft="bottom-left"
+}
+-------------------------------
+Kullanımı için layout.component.ts dosyasından dashboard.component.ts dosyasına taşıyalım. ve testimizi orada yapalım dashboard.component.html sayfasında 2 buton ekliyoruz biri notification oluşturuyor diğeri ise oluşan tüm notificationları yok ediyor.
+-------------------------------
+<button (click)="m()">Alertify</button><button (click)="dismiss()">Dismiss</button>
+-----------------------------
+import { Component, OnInit } from '@angular/core';
+import { AlertifyService, MessageType, Position } from '../../../../services/admin/alertify.service';
+
+@Component({
+  selector: 'app-dashboard',
+  standalone: false,
+  
+  templateUrl: './dashboard.component.html',
+  styleUrl: './dashboard.component.css'
+})
+export class DashboardComponent implements OnInit {
+
+  constructor(private alertifyService:AlertifyService){}
+  ngOnInit(): void {
+    
+  }
+
+  m(){
+    this.alertifyService.message("Başarılı",MessageType.Success,Position.TopCenter,5)
+
+  }
+  dismiss(){
+    this.alertifyService.dismiss()
+  }
+
+}
+----------------------------
+
  
   
 
