@@ -1546,7 +1546,169 @@ export class DashboardComponent implements OnInit {
 
 }
 ----------------------------
+son bir özellik ekliyoruz. bu da sadece 1 tane notificationa izin veriyor diğerlerine izin vermiyor. bu özellik te dismissother özelliği ve servisimizin son hali şu şekilde oluyor.
+-----------------------------
+import { Injectable } from '@angular/core';
+declare var alertify:any
 
+@Injectable({
+  providedIn: 'root'
+})
+export class AlertifyService {
+
+  constructor() { }
+
+  message(message:string,messageType:MessageType,position:Position,delay:number,dismissOthers:boolean=false){
+    alertify.set('notifier','delay', delay);
+
+    alertify.set('notifier','position', position);
+
+    const msj=alertify[messageType](message) 
+    if(dismissOthers)
+      msj.dismissOthers();   
+    
+  }
+  
+  dismiss(){
+    alertify.dismissAll();
+  }
+}
+
+export enum MessageType{
+  Error="error",
+  Message="message",
+  Notify="notify",
+  Success="success",
+  Warning="warning"
+
+}
+
+export enum Position{
+  TopCenter="top-center",
+  TopRight="top-right",
+  TopLeft="top-left",
+  BottomCenter="bottom-center",
+  BottomRight="bottom-right",
+  BottomLeft="bottom-left"
+}
+-----------------------------
+kullanımıda şu şekilde oluyor.
+-----------------------------
+import { Component, OnInit } from '@angular/core';
+import { AlertifyService, MessageType, Position } from '../../../../services/admin/alertify.service';
+
+@Component({
+  selector: 'app-dashboard',
+  standalone: false,
+  
+  templateUrl: './dashboard.component.html',
+  styleUrl: './dashboard.component.css'
+})
+export class DashboardComponent implements OnInit {
+
+  constructor(private alertifyService:AlertifyService){}
+  ngOnInit(): void {
+    
+  }
+
+  m(){
+    this.alertifyService.message("Başarılı",MessageType.Success,Position.TopCenter,5,true)
+
+  }
+  dismiss(){
+    this.alertifyService.dismiss()
+  }
+
+}
+------------------------------
+Böylece alertify özelleştirmemiz bitti.artık dashboard.component.ts dosyasını temizleyebiliriz. alertify serviste böyle parametre olarak çok kullanışlı değil o yüzden bu parametreleri bir nesneye çevirerek kullanacağız.
+--------------------------
+import { Injectable } from '@angular/core';
+declare var alertify:any
+
+@Injectable({
+  providedIn: 'root'
+})
+export class AlertifyService {
+
+  constructor() { }
+
+  //message(message:string,messageType:MessageType,position:Position,delay:number,dismissOthers:boolean=false)
+  
+  message(message:string,options:Partial<AlertifyOptions>) { 
+  alertify.set('notifier','delay', options.delay);
+    alertify.set('notifier','position', options.position);
+    const msj=alertify[options.messageType](message) 
+    if(options.dismissOthers)
+      msj.dismissOthers();   
+    
+  } 
+  
+  dismiss(){
+    alertify.dismissAll();
+  }
+}
+export class AlertifyOptions{
+    messageType:MessageType=MessageType.Message
+    position:Position=Position.BottomRight
+    delay:number=3
+    dismissOthers:boolean=false
+}
+
+export enum MessageType{
+  Error="error",
+  Message="message",
+  Notify="notify",
+  Success="success",
+  Warning="warning"
+
+}
+
+export enum Position{
+  TopCenter="top-center",
+  TopRight="top-right",
+  TopLeft="top-left",
+  BottomCenter="bottom-center",
+  BottomRight="bottom-right",
+  BottomLeft="bottom-left"
+}
+
+--------------------------
+<button (click)="m()">Alertify</button><button (click)="dismiss()">Dismiss</button>
+-------------------------
+import { Component, OnInit } from '@angular/core';
+import { AlertifyService, MessageType, Position } from '../../../../services/admin/alertify.service';
+
+@Component({
+  selector: 'app-dashboard',
+  standalone: false,
+  
+  templateUrl: './dashboard.component.html',
+  styleUrl: './dashboard.component.css'
+})
+export class DashboardComponent implements OnInit {
+
+  constructor(private alertifyService:AlertifyService){}
+  ngOnInit(): void {
+    
+  }
+
+  m(){
+    this.alertifyService.message("Başarılı",{
+      messageType:MessageType.Warning,
+      delay:5,
+      position:Position.BottomRight,
+      dismissOthers:true
+    })
+
+  }
+  dismiss(){
+    this.alertifyService.dismiss()
+  }
+
+}
+----------------------------
+alertifi özelliklerini nesneye çevirerek kullanıyoruz.
  
   
 
