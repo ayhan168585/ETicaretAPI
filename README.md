@@ -1708,7 +1708,92 @@ export class DashboardComponent implements OnInit {
 
 }
 ----------------------------
-alertifi özelliklerini nesneye çevirerek kullanıyoruz.
+alertifi özelliklerini nesneye çevirerek kullanıyoruz.Şimdi UI kısmında kullanmak üzere ngx-toastr kütüphanesini kurup kendimize göre özelleştireceğiz. öncelikle npm install ngx-toastr --save komutuyla kütüphaneyi yüklüyoruz. npm install @angular/animations --save komutuyla animasyon kütüphanesini de yüklüyoruz. Bunu da kendimize göre düzenleyeceğimizden bir customToastrService oluşturuyoruz.
+-------------------------------
+import { Injectable } from '@angular/core';
+import { ToastrService } from 'ngx-toastr';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class CustomToastrService {
+
+  constructor(private toastrService:ToastrService) { }
+
+  message(message:string, title:string,toastrOptions:Partial<ToastrOptions>){
+    this.toastrService[toastrOptions.toastrmessageType](message,title,{
+      positionClass:toastrOptions.toastrPosition,
+      messageClass:toastrOptions.toastrmessageType
+    })
+  }
+}
+
+export enum ToastrMessageType{
+Success="success",
+Info="info",
+Warning="warning",
+Error="error"
+}
+
+export enum ToastrPosition{
+TopRight="toast-top-right",
+BottomRight="toast-bottom-right",
+BottomLeft="toast-bottom-left",
+TopLeft="toast-top-left",
+TopFullWidth="toast-top-full-width",
+BottomFullWidth="toast-bottom-full-width",
+TopCenter="toast-top-center",
+BottomCenter="toast-bottom-center"
+
+}
+
+export class ToastrOptions{
+  toastrmessageType:ToastrMessageType=ToastrMessageType.Success
+  toastrPosition:ToastrPosition
+}
+--------------------------------
+Bunu test kullanımımız olan dashboard.component.ts de şu şekilde kullanıyoruz. Burayı şimdilik test olarak kullanıyoruz burayı daha sonra farklı şekilde düzenleyeceğiz.
+------------------------------
+import { Component, OnInit } from '@angular/core';
+import { AlertifyService, MessageType, Position } from '../../../../services/admin/alertify.service';
+import { CustomToastrService, ToastrMessageType, ToastrPosition } from '../../../../services/ui/custom-toastr.service';
+import { ToastrService } from 'ngx-toastr';
+
+@Component({
+  selector: 'app-dashboard',
+  standalone: false,
+  
+  templateUrl: './dashboard.component.html',
+  styleUrl: './dashboard.component.css'
+})
+export class DashboardComponent implements OnInit {
+
+  constructor(private alertifyService:AlertifyService,private customToastrService:CustomToastrService){}
+  ngOnInit(): void {
+    
+  }
+
+  m(){
+    this.alertifyService.message("Başarılı",{
+      messageType:MessageType.Error,
+      delay:5,
+      position:Position.BottomRight,
+      dismissOthers:false
+    })
+    this.customToastrService.message("Sipariş Başarılı","Sipariş",{
+      toastrmessageType:ToastrMessageType.Error,
+      toastrPosition:ToastrPosition.BottomCenter
+    })
+  }
+  dismiss(){
+    this.alertifyService.dismiss()
+  }
+
+}
+-------------------------------
+Bu düzenleme bizim için yeterli diğer özelliklerini kullanmaya gerek yok. Böylece toastr kütüphanemiz tamamlandı şimdi sayfalar arası geçişte bekleniyor...,loading gibi bir şey yazan bir animasyon kütüphenesi yükleyeceğiz ve kendimize göre özelleştireceğiz.
+
+
  
   
 
