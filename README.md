@@ -1791,7 +1791,104 @@ export class DashboardComponent implements OnInit {
 
 }
 -------------------------------
-Bu düzenleme bizim için yeterli diğer özelliklerini kullanmaya gerek yok. Böylece toastr kütüphanemiz tamamlandı şimdi sayfalar arası geçişte bekleniyor...,loading gibi bir şey yazan bir animasyon kütüphenesi yükleyeceğiz ve kendimize göre özelleştireceğiz.
+Bu düzenleme bizim için yeterli diğer özelliklerini kullanmaya gerek yok. Böylece toastr kütüphanemiz tamamlandı şimdi sayfalar arası geçişte bekleniyor...,loading gibi bir şey yazan bir animasyon kütüphenesi olan ngx-spinner kütüphanesini yükleyeceğiz ve kendimize göre özelleştireceğiz. Hangi animasyonları kullanacaksak onların css dosyalarını angular.json dosyasıntaki styles kısmına ekliyoruz. Hangi component te kullanacaksak o componentin bağlı olduğu modüle spinner modül eklenir.
+---------------------------------
+Angular.json
+--------------------------
+"node_modules/ngx-spinner/animations/ball-scale-multiple.css",
+"node_modules/ngx-spinner/animations/ball-atom.css",
+"node_modules/ngx-spinner/animations/ball-spin-fade-rotating.css"
+--------------------------------
+app.component.html kullanacaksak app.module eklenir.
+--------------------------------
+
+<nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <div class="container-fluid">
+      <a class="navbar-brand" routerLink="">Mini E-Ticaret</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" routerLink="">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" routerLink="products">Products</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" routerLink="basket">Basket</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" routerLink="admin">Yönetim Paneli</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Link</a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Dropdown
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="#">Action</a></li>
+              <li><a class="dropdown-item" href="#">Another action</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="#">Something else here</a></li>
+            </ul>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link disabled" aria-disabled="true">Disabled</a>
+          </li>
+        </ul>
+        <form class="d-flex" role="search">
+          <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+          <button class="btn btn-outline-success" type="submit">Search</button>
+        </form>
+      </div>
+    </div>
+  </nav>
+
+  
+
+
+  <router-outlet></router-outlet>
+  <ngx-spinner type="ball-scale-multiple"></ngx-spinner>
+  -----------------------------
+  import { NgModule } from '@angular/core';
+import { BrowserModule, provideClientHydration, withEventReplay } from '@angular/platform-browser';
+
+import { AppRoutingModule } from './app-routing.module';
+import { AppComponent } from './app.component';
+import { AdminModule } from './admin/admin.module';
+import { UiModule } from './ui/ui.module';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import {ToastrModule} from "ngx-toastr"
+import {NgxSpinnerModule} from "ngx-spinner"
+
+@NgModule({
+  declarations: [
+    AppComponent
+  ],
+  imports: [
+    BrowserModule,
+    BrowserAnimationsModule,
+    NgxSpinnerModule,
+    ToastrModule.forRoot(),
+    AppRoutingModule,
+    AdminModule,
+    UiModule
+  ],
+ 
+  providers: [
+    provideClientHydration(withEventReplay()),
+    provideAnimationsAsync()
+  ],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
+---------------------------------
+
 
 
  
