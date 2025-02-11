@@ -1888,6 +1888,59 @@ import {NgxSpinnerModule} from "ngx-spinner"
 })
 export class AppModule { }
 ---------------------------------
+Çalıştığını gördük şimdi bunu kendimize uygun şekilde düzenleyelim. ng g c base ile bir base component oluşturuyoruz. Ama bu base de selector,html ve css kullanılmayacak hatta bunun component ifadesinin olmasına bile gerek yok adı bir component ama kullanımı class olacak. implements OnInit yapılanmasını da siliyoruz böylece bir class kalıyor.Madem kullanmayacağız o zaman base.component.html ve base.component.css ve test için kullanılan spec dosyasını siliyoruz. sadece geriye base.component.ts kalıyor. Burada bir metot oluşturuyoruz. bu bütün componentlerde kullanılacak. kullanacağımız spinnerlere isim vererek html taglarini düzenliyoruz. Routing işlemlerinde kullanacağımız componentleri de base.component.ts den türeteceğiz.Bu componentler customers,dashboard,orders,products
+
+Base.component
+----------------------------
+import { NgxSpinnerService } from "ngx-spinner";
+import { timeout } from "rxjs";
+
+
+export class BaseComponent  {
+constructor(private spinner:NgxSpinnerService){}
+
+showSpinner(spinnerNameType:SpinnerType){
+this.spinner.show(spinnerNameType)
+
+setTimeout(()=>this.hideSpinner(spinnerNameType),3000)
+}
+
+hideSpinner(spinnerNameType:SpinnerType){
+  this.spinner.hide(spinnerNameType)
+}
+
+}
+
+export enum SpinnerType{
+  BallScaleMultiple="s1",
+  BallAtom="s2",
+  BallSpinClockwiseFadeRotating="s3"
+}
+----------------------------------
+Türeyen componentler şu şekilde olacak örneğin customer.component
+--------------------------------
+import { Component, OnInit } from '@angular/core';
+import { BaseComponent, SpinnerType } from '../../../../base/base.component';
+import { NgxSpinnerService } from 'ngx-spinner';
+
+@Component({
+  selector: 'app-customers',
+  standalone: false,
+  
+  templateUrl: './customers.component.html',
+  styleUrl: './customers.component.css'
+})
+export class CustomersComponent extends BaseComponent implements OnInit {
+  constructor(spinner:NgxSpinnerService){
+    super(spinner)
+  }
+  ngOnInit(): void {
+    this.showSpinner(SpinnerType.BallAtom)
+  }
+
+}
+-------------------------------
+
 
 
 
